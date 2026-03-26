@@ -13,7 +13,7 @@ const authMiddleware = (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization || !authorization.startsWith('Bearer ')) {
-      throw new AuthenticationError('akses ditolak. membutuhkan access token');
+      throw new AuthenticationError('Missing authentication');
     }
 
     const accessToken = authorization.replace('Bearer ', '');
