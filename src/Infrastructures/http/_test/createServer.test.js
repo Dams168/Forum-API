@@ -11,6 +11,11 @@ describe('HTTP server', () => {
     await pool.end();
   });
 
+  beforeEach(async () => {
+    await UsersTableTestHelper.cleanTable();
+    await AuthenticationsTableTestHelper.cleanTable();
+  });
+
   afterEach(async () => {
     await UsersTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
@@ -60,7 +65,9 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('tidak dapat membuat user baru karena properti yang dibutuhkan tidak ada');
+      expect(response.body.message).toEqual(
+        'tidak dapat membuat user baru karena properti yang dibutuhkan tidak ada',
+      );
     });
 
     it('should response 400 when request payload not meet data type specification', async () => {
@@ -78,7 +85,9 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('tidak dapat membuat user baru karena tipe data tidak sesuai');
+      expect(response.body.message).toEqual(
+        'tidak dapat membuat user baru karena tipe data tidak sesuai',
+      );
     });
 
     it('should response 400 when username more than 50 character', async () => {
@@ -96,7 +105,9 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('tidak dapat membuat user baru karena karakter username melebihi batas limit');
+      expect(response.body.message).toEqual(
+        'tidak dapat membuat user baru karena karakter username melebihi batas limit',
+      );
     });
 
     it('should response 400 when username contain restricted character', async () => {
@@ -114,7 +125,9 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('tidak dapat membuat user baru karena username mengandung karakter terlarang');
+      expect(response.body.message).toEqual(
+        'tidak dapat membuat user baru karena username mengandung karakter terlarang',
+      );
     });
 
     it('should response 400 when username unavailable', async () => {
@@ -267,7 +280,9 @@ describe('HTTP server', () => {
     it('should return 400 if refresh token not valid', async () => {
       const app = await createServer(container);
 
-      const response = await request(app).put('/authentications').send({ refreshToken: 'invalid_refresh_token' });
+      const response = await request(app)
+        .put('/authentications')
+        .send({ refreshToken: 'invalid_refresh_token' });
 
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
@@ -276,7 +291,9 @@ describe('HTTP server', () => {
 
     it('should return 400 if refresh token not registered in database', async () => {
       const app = await createServer(container);
-      const refreshToken = await container.getInstance(AuthenticationTokenManager.name).createRefreshToken({ username: 'dicoding' });
+      const refreshToken = await container
+        .getInstance(AuthenticationTokenManager.name)
+        .createRefreshToken({ username: 'dicoding' });
 
       const response = await request(app).put('/authentications').send({ refreshToken });
 
