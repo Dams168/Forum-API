@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../../Commons/config.js';
@@ -7,6 +8,7 @@ import DomainErrorTranslator from '../../Commons/exceptions/DomainErrorTranslato
 import users from '../../Interfaces/http/api/users/index.js';
 import authentications from '../../Interfaces/http/api/authentications/index.js';
 import threads from '../../Interfaces/http/api/threads/index.js';
+import comments from '../../Interfaces/http/api/comments/index.js';
 
 const authMiddleware = (req, res, next) => {
   try {
@@ -40,7 +42,7 @@ const createServer = async (container) => {
   app.use('/users', users(container));
   app.use('/authentications', authentications(container));
   app.use('/threads', authMiddleware, threads(container));
-
+  app.use('/threads/:threadId/comments', authMiddleware, comments(container));
   // Global error handler
   app.use((error, req, res, next) => {
     // console.error(error); // log error for debugging
