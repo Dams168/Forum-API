@@ -1,4 +1,4 @@
-export default class ThreadRepository {
+export default class AddedThread {
   constructor(payload) {
     this._verifyPayload(payload);
 

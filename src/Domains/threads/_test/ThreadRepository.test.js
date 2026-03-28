@@ -6,7 +6,7 @@ describe('ThreadRepository', () => {
     const threadRepository = new ThreadRepository();
 
     // Act and Assert
-    await expect(threadRepository.addThread({})).rejects.toThrowError(
+    await expect(threadRepository.addThread({}, 'user-123')).rejects.toThrowError(
       'THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED',
     );
 

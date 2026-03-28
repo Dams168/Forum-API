@@ -46,8 +46,8 @@ describe('AddThreadUseCase', () => {
       new AddThread({
         title: useCasePayload.title,
         body: useCasePayload.body,
-        owner: useCasePayload.owner,
       }),
+      useCasePayload.owner,
     );
   });
 });

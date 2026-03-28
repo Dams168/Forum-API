@@ -7,7 +7,6 @@ describe('AddThread', () => {
     // Arrange
     const payload = {
       title: 'Thread Title',
-      body: 'Thread Body',
     };
     // Act and Assert
     expect(() => new AddThread(payload)).toThrowError('ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
@@ -17,8 +16,7 @@ describe('AddThread', () => {
     // Arrange
     const payload = {
       title: 'Thread Title',
-      body: 'Thread Body',
-      owner: 123, // Invalid data type
+      body: 123, // Invalid data type
     };
     // Act and Assert
     expect(() => new AddThread(payload)).toThrowError(
@@ -31,7 +29,6 @@ describe('AddThread', () => {
     const payload = {
       title: 'A'.repeat(101), // Exceeds the 100-character limit
       body: 'Thread Body',
-      owner: 'user1',
     };
     // Act and Assert
     expect(() => new AddThread(payload)).toThrowError('ADD_THREAD.TITLE_LIMIT_CHAR');
@@ -42,7 +39,6 @@ describe('AddThread', () => {
     const payload = {
       title: 'Thread Title',
       body: 'Thread Body',
-      owner: 'user1',
     };
     // Act
     const addThread = new AddThread(payload);
@@ -50,6 +46,5 @@ describe('AddThread', () => {
     expect(addThread).toBeInstanceOf(AddThread);
     expect(addThread.title).toEqual(payload.title);
     expect(addThread.body).toEqual(payload.body);
-    expect(addThread.owner).toEqual(payload.owner);
   });
 });

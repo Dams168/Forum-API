@@ -6,7 +6,12 @@ export default class AddThreadUseCase {
   }
 
   async execute(useCasePayload) {
-    const addThread = new AddThread(useCasePayload);
-    return this._threadRepository.addThread(addThread);
+    const { owner } = useCasePayload;
+    const addThread = new AddThread({
+      title: useCasePayload.title,
+      body: useCasePayload.body,
+    });
+
+    return this._threadRepository.addThread(addThread, owner);
   }
 }
