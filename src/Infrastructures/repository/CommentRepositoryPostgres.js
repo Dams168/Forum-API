@@ -8,7 +8,8 @@ export default class CommentRepositoryPostgres extends CommentRepository {
     this._idGenerator = idGenerator;
   }
 
-  async addComment({ owner, threadId, content }) {
+  async addComment(addComment, owner, threadId) {
+    const { content } = addComment;
     const id = `comment-${this._idGenerator()}`;
     const query = {
       text: 'INSERT INTO comments(id, owner, thread_id, content) VALUES($1, $2, $3, $4) RETURNING id, owner, thread_id, content',

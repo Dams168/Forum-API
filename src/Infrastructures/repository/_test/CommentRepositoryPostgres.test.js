@@ -28,15 +28,13 @@ describe('a CommentRepository interface', () => {
       // Arrange
       const newComment = new AddComment({
         content: 'sebuah comment',
-        owner: 'user-123',
-        threadId: 'thread-123',
       });
 
       const fakeIdGenerator = () => '123'; // stub!
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      await commentRepositoryPostgres.addComment(newComment);
+      await commentRepositoryPostgres.addComment(newComment, 'user-123', 'thread-123');
 
       // Assert
       const comments = await CommentsTableTestHelper.findCommentsById('comment-123');
@@ -46,15 +44,17 @@ describe('a CommentRepository interface', () => {
       // Arrange
       const newComment = new AddComment({
         content: 'sebuah comment',
-        owner: 'user-123',
-        threadId: 'thread-123',
       });
 
       const fakeIdGenerator = () => '123'; // stub!
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const addedComment = await commentRepositoryPostgres.addComment(newComment);
+      const addedComment = await commentRepositoryPostgres.addComment(
+        newComment,
+        'user-123',
+        'thread-123',
+      );
 
       // Assert
       expect(addedComment).toStrictEqual(
@@ -62,7 +62,6 @@ describe('a CommentRepository interface', () => {
           id: 'comment-123',
           content: newComment.content,
           owner: 'user-123',
-          threadId: 'thread-123',
         }),
       );
     });

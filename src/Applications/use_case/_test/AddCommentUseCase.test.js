@@ -51,9 +51,9 @@ describe('a AddCommentUseCase', () => {
     expect(mockCommentRepository.addComment).toBeCalledWith(
       new AddComment({
         content: useCasePayload.content,
-        owner: useCasePayload.owner,
-        threadId: useCasePayload.threadId,
       }),
+      useCasePayload.owner,
+      useCasePayload.threadId,
     );
   });
 });

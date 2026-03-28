@@ -7,9 +7,15 @@ export default class AddCommentUseCase {
   }
 
   async execute(useCasePayload) {
-    const addComment = new AddComment(useCasePayload);
+    const addComment = new AddComment({
+      content: useCasePayload.content,
+    });
 
-    await this._threadRepository.verifyThreadExists(addComment.threadId);
-    return this._commentRepository.addComment(addComment);
+    await this._threadRepository.verifyThreadExists(useCasePayload.threadId);
+    return this._commentRepository.addComment(
+      addComment,
+      useCasePayload.owner,
+      useCasePayload.threadId,
+    );
   }
 }
