@@ -38,12 +38,6 @@ DomainErrorTranslator._directories = {
     'refresh token harus string',
   ),
 
-  'ADD_THREAD_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError(
-    'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada',
-  ),
-  'ADD_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError(
-    'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
-  ),
   'ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError(
     'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada',
   ),
@@ -51,12 +45,6 @@ DomainErrorTranslator._directories = {
     'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
   ),
 
-  'ADD_COMMENT_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError(
-    'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak ada',
-  ),
-  'ADD_COMMENT_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError(
-    'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
-  ),
   'ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError(
     'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak ada',
   ),

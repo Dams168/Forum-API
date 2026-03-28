@@ -55,20 +55,34 @@ describe('DomainErrorTranslator', () => {
         new Error('DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION'),
       ),
     ).toStrictEqual(new InvariantError('refresh token harus string'));
+
     expect(
-      DomainErrorTranslator.translate(new Error('ADD_THREAD_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY')),
+      DomainErrorTranslator.translate(new Error('ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY')),
     ).toStrictEqual(
       new InvariantError(
         'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada',
       ),
     );
     expect(
-      DomainErrorTranslator.translate(
-        new Error('ADD_THREAD_USE_CASE.NOT_MEET_DATA_TYPE_SPECIFICATION'),
-      ),
+      DomainErrorTranslator.translate(new Error('ADD_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION')),
     ).toStrictEqual(
       new InvariantError(
         'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
+      ),
+    );
+
+    expect(
+      DomainErrorTranslator.translate(new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY')),
+    ).toStrictEqual(
+      new InvariantError(
+        'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak ada',
+      ),
+    );
+    expect(
+      DomainErrorTranslator.translate(new Error('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION')),
+    ).toStrictEqual(
+      new InvariantError(
+        'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
       ),
     );
   });
