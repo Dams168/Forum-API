@@ -51,6 +51,13 @@ DomainErrorTranslator._directories = {
   'ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError(
     'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
   ),
+
+  'ADD_REPLY.NOT_CONTAIN_CONTENT': new InvariantError(
+    'Tidak dapat membuat reply baru karena properti content tidak ada',
+  ),
+  'ADD_REPLY.CONTENT_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError(
+    'Tidak dapat membuat reply baru karena properti content tidak sesuai dengan spesifikasi data type',
+  ),
 };
 
 export default DomainErrorTranslator;

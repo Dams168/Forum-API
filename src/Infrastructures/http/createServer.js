@@ -10,6 +10,7 @@ import authentications from '../../Interfaces/http/api/authentications/index.js'
 import threads from '../../Interfaces/http/api/threads/index.js';
 import comments from '../../Interfaces/http/api/comments/index.js';
 import authMiddleware from './middleware/AuthMiddleware.js';
+import replies from '../../Interfaces/http/api/replies/index.js';
 
 const createServer = async (container) => {
   const app = express();
@@ -22,6 +23,7 @@ const createServer = async (container) => {
   app.use('/authentications', authentications(container));
   app.use('/threads', threads(container));
   app.use('/threads/:threadId/comments', authMiddleware, comments(container));
+  app.use('/threads/:threadId/comments/:commentId/replies', authMiddleware, replies(container));
   // Global error handler
   app.use((error, req, res, next) => {
     // console.error(error); // log error for debugging

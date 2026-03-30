@@ -85,6 +85,21 @@ describe('DomainErrorTranslator', () => {
         'tidak dapat membuat comment baru karena properti yang dibutuhkan tidak sesuai dengan spesifikasi data type',
       ),
     );
+
+    expect(
+      DomainErrorTranslator.translate(new Error('ADD_REPLY.NOT_CONTAIN_CONTENT')),
+    ).toStrictEqual(
+      new InvariantError('Tidak dapat membuat reply baru karena properti content tidak ada'),
+    );
+    expect(
+      DomainErrorTranslator.translate(
+        new Error('ADD_REPLY.CONTENT_NOT_MEET_DATA_TYPE_SPECIFICATION'),
+      ),
+    ).toStrictEqual(
+      new InvariantError(
+        'Tidak dapat membuat reply baru karena properti content tidak sesuai dengan spesifikasi data type',
+      ),
+    );
   });
 
   it('should return original error when error message is not needed to translate', () => {
