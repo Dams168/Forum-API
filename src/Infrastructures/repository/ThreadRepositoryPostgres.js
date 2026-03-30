@@ -9,7 +9,7 @@ export default class ThreadRepositoryPostgres extends ThreadRepository {
     this._idGenerator = idGenerator;
   }
 
-  async verifyThreadExists(id) {
+  async verifyThreadById(id) {
     const query = {
       text: 'SELECT id FROM threads WHERE id = $1',
       values: [id],

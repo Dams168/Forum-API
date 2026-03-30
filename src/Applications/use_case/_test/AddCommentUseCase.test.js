@@ -24,7 +24,7 @@ describe('a AddCommentUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThreadExists = vi.fn().mockImplementation(() => Promise.resolve());
+    mockThreadRepository.verifyThreadById = vi.fn().mockImplementation(() => Promise.resolve());
     mockCommentRepository.addComment = vi
       .fn()
       .mockImplementation(() => Promise.resolve(mockAddedComment));
@@ -47,7 +47,7 @@ describe('a AddCommentUseCase', () => {
       }),
     );
 
-    expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(useCasePayload.threadId);
+    expect(mockThreadRepository.verifyThreadById).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.addComment).toBeCalledWith(
       new AddComment({
         content: useCasePayload.content,

@@ -4,13 +4,14 @@ import pool from '../src/Infrastructures/database/postgres/pool.js';
 export const CommentsTableTestHelper = {
   async addComment({
     id = 'comment-123',
-    userId = 'user-123',
+    owner = 'user-123',
     threadId = 'thread-123',
     content = 'sebuah comment',
+    isDeleted = false,
   }) {
     const query = {
-      text: 'INSERT INTO comments VALUES($1, $2, $3, $4)',
-      values: [id, userId, threadId, content],
+      text: 'INSERT INTO comments (id, owner, thread_id, content, is_deleted) VALUES($1, $2, $3, $4, $5)',
+      values: [id, owner, threadId, content, isDeleted],
     };
 
     await pool.query(query);

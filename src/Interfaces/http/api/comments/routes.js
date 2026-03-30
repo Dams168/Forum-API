@@ -7,6 +7,10 @@ const routes = (controller) => {
     controller.addComment(req, res);
   });
 
+  router.delete('/:commentId', (req, res) => {
+    controller.deleteComment(req, res);
+  });
+
   return router;
 };
 
