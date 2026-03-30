@@ -9,6 +9,9 @@ import AddedComment from '../../../Domains/comments/entitities/AddedComment.js';
 import NotFoundError from '../../../Commons/exceptions/NotFoundError.js';
 import AuthorizationError from '../../../Commons/exceptions/AuthorizationError.js';
 
+const toISOStringPreservingLocal = (dateValue) =>
+  new Date(dateValue.getTime() - dateValue.getTimezoneOffset() * 60000).toISOString();
+
 describe('a CommentRepository interface', () => {
   afterEach(async () => {
     await CommentsTableTestHelper.cleanTable();
@@ -177,6 +180,65 @@ describe('a CommentRepository interface', () => {
       const comments = await CommentsTableTestHelper.findCommentsById('comment-123');
       expect(comments).toHaveLength(1);
       expect(comments[0].is_deleted).toBe(true);
+    });
+  });
+
+  describe('getCommentsByThreadId function', () => {
+    it('should return empty array when thread has no comments', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
+
+      expect(comments).toStrictEqual([]);
+    });
+
+    it('should return comments ordered by date with correct mapping', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-111',
+        owner: 'user-123',
+        threadId: 'thread-123',
+        content: 'first comment',
+        isDeleted: false,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-222',
+        owner: 'user-123',
+        threadId: 'thread-123',
+        content: 'second comment',
+        isDeleted: true,
+      });
+
+      await pool.query('UPDATE comments SET date = $1 WHERE id = $2', [
+        new Date('2021-08-08T07:19:09.775Z'),
+        'comment-111',
+      ]);
+      await pool.query('UPDATE comments SET date = $1 WHERE id = $2', [
+        new Date('2021-09-08T07:19:09.775Z'),
+        'comment-222',
+      ]);
+
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
+
+      expect(comments).toHaveLength(2);
+      expect(comments[0]).toMatchObject({
+        id: 'comment-111',
+        content: 'first comment',
+        username: 'dicoding',
+        isDeleted: false,
+      });
+      expect(comments[1]).toMatchObject({
+        id: 'comment-222',
+        content: 'second comment',
+        username: 'dicoding',
+        isDeleted: true,
+      });
+      expect(comments[0].date).toBe(
+        toISOStringPreservingLocal(new Date('2021-08-08T07:19:09.775Z')),
+      );
+      expect(comments[1].date).toBe(
+        toISOStringPreservingLocal(new Date('2021-09-08T07:19:09.775Z')),
+      );
     });
   });
 });

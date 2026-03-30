@@ -3,6 +3,9 @@ import CommentRepository from '../../Domains/comments/CommentRepository.js';
 import AuthorizationError from '../../Commons/exceptions/AuthorizationError.js';
 import NotFoundError from '../../Commons/exceptions/NotFoundError.js';
 
+const toISOStringPreservingLocal = (dateValue) =>
+  new Date(dateValue.getTime() - dateValue.getTimezoneOffset() * 60000).toISOString();
+
 export default class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
     super();
@@ -62,5 +65,32 @@ export default class CommentRepositoryPostgres extends CommentRepository {
     };
 
     await this._pool.query(query);
+  }
+
+  async getCommentsByThreadId(threadId) {
+    const query = {
+      text: `
+        SELECT comments.id,
+               comments.content,
+               comments.date,
+               comments.is_deleted AS "isDeleted",
+               users.username
+        FROM comments
+        JOIN users ON users.id = comments.owner
+        WHERE comments.thread_id = $1
+        ORDER BY comments.date ASC
+      `,
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows.map(({ id, content, date, username, isDeleted }) => ({
+      id,
+      username,
+      date: toISOStringPreservingLocal(date instanceof Date ? date : new Date(date)),
+      content,
+      isDeleted,
+    }));
   }
 }

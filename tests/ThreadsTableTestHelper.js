@@ -7,10 +7,11 @@ export const ThreadsTableTestHelper = {
     title = 'Thread Title',
     body = 'Thread Body',
     owner = 'user-123',
+    date = new Date().toISOString(),
   }) {
     const query = {
-      text: 'INSERT INTO threads VALUES($1, $2, $3, $4)',
-      values: [id, title, body, owner],
+      text: 'INSERT INTO threads (id, title, body, owner, date) VALUES($1, $2, $3, $4, $5)',
+      values: [id, title, body, owner, date],
     };
 
     await pool.query(query);

@@ -6,6 +6,7 @@ import pool from '../../database/postgres/pool.js';
 import createServer from '../../http/createServer.js';
 import container from '../../container.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
+import { describe } from 'vitest';
 
 describe('Threads endpoint', () => {
   let server;
@@ -109,6 +110,37 @@ describe('Threads endpoint', () => {
       const response = await request(server).post('/threads').send(requestPayload);
 
       expect(response.statusCode).toEqual(401);
+    });
+  });
+
+  describe('when GET /threads/{threadId}', () => {
+    it('should response 200 and detail thread', async () => {
+      const thread = {
+        id: 'thread-123',
+        title: 'Thread Title',
+        body: 'Thread Body',
+        date: '2021-08-08T07:19:09.775Z',
+      };
+
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'john_doe' });
+      await ThreadsTableTestHelper.addThread({ ...thread, owner: 'user-123' });
+
+      const response = await request(server).get(`/threads/${thread.id}`);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.status).toEqual('success');
+      expect(response.body.data.thread).toBeDefined();
+      expect(response.body.data.thread.id).toEqual(thread.id);
+      expect(response.body.data.thread.title).toEqual(thread.title);
+      expect(response.body.data.thread.body).toEqual(thread.body);
+      expect(response.body.data.thread.date).toEqual(thread.date);
+    });
+    it('should response 404 when thread not found', async () => {
+      const response = await request(server).get('/threads/thread-999');
+
+      expect(response.statusCode).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Thread not found');
     });
   });
 });

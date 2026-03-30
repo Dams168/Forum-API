@@ -5,6 +5,7 @@ import ThreadRepositoryPostgres from '../ThreadRepositoryPostgres.js';
 import { afterEach, beforeEach, expect } from 'vitest';
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
+import NotFoundError from '../../../Commons/exceptions/NotFoundError.js';
 
 describe('ThreadRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -56,6 +57,39 @@ describe('ThreadRepositoryPostgres', () => {
           owner: 'user-123',
         }),
       );
+    });
+  });
+
+  describe('getDetailThreadById function', () => {
+    it('should throw NotFoundError when thread not found', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      await expect(threadRepositoryPostgres.getDetailThreadById('thread-999')).rejects.toThrowError(
+        new NotFoundError('Thread not found'),
+      );
+    });
+
+    it('should return detail thread correctly', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      const customDate = new Date('2021-08-08T07:19:09.775Z');
+      const timezoneNeutralDate = new Date(
+        customDate.getTime() - customDate.getTimezoneOffset() * 60000,
+      ).toISOString();
+
+      await pool.query(
+        'INSERT INTO threads (id, title, body, owner, date) VALUES($1, $2, $3, $4, $5)',
+        ['thread-321', 'sebuah thread', 'sebuah body thread', 'user-123', customDate],
+      );
+
+      const detailThread = await threadRepositoryPostgres.getDetailThreadById('thread-321');
+
+      expect(detailThread).toStrictEqual({
+        id: 'thread-321',
+        title: 'sebuah thread',
+        body: 'sebuah body thread',
+        username: 'dicoding',
+        date: timezoneNeutralDate,
+      });
     });
   });
 });

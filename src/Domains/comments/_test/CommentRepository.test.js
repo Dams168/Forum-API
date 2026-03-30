@@ -21,5 +21,8 @@ describe('a CommentRepository interface', () => {
     await expect(commentRepository.deleteCommentById('comment-123')).rejects.toThrowError(
       'COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED',
     );
+    await expect(commentRepository.getCommentsByThreadId('thread-123')).rejects.toThrowError(
+      'COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED',
+    );
   });
 });

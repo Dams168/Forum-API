@@ -2,6 +2,9 @@ import ThreadRepository from '../../Domains/threads/ThreadRepository.js';
 import AddedThread from '../../Domains/threads/entities/AddedThread.js';
 import NotFoundError from '../../Commons/exceptions/NotFoundError.js';
 
+const toISOStringPreservingLocal = (dateValue) =>
+  new Date(dateValue.getTime() - dateValue.getTimezoneOffset() * 60000).toISOString();
+
 export default class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
     super();
@@ -18,8 +21,36 @@ export default class ThreadRepositoryPostgres extends ThreadRepository {
     const result = await this._pool.query(query);
 
     if (!result.rowCount) {
-      throw new NotFoundError('Thread Not Found');
+      throw new NotFoundError('Thread not found');
     }
+  }
+
+  async getDetailThreadById(id) {
+    const query = {
+      text: `
+        SELECT threads.id, threads.title, threads.body, threads.date, users.username
+        FROM threads
+        JOIN users ON users.id = threads.owner
+        WHERE threads.id = $1
+      `,
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Thread not found');
+    }
+
+    const { title, body, date, username } = result.rows[0];
+
+    return {
+      id,
+      title,
+      body,
+      date: toISOStringPreservingLocal(date),
+      username,
+    };
   }
 
   async addThread(newThread, owner) {
