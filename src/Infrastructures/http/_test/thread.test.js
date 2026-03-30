@@ -2,6 +2,8 @@ import request from 'supertest';
 
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
+import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
+import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
 import pool from '../../database/postgres/pool.js';
 import createServer from '../../http/createServer.js';
 import container from '../../container.js';
@@ -22,11 +24,15 @@ describe('Threads endpoint', () => {
   });
 
   beforeEach(async () => {
+    await RepliesTableTestHelper.cleanTable();
+    await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
   });
 
   afterEach(async () => {
+    await RepliesTableTestHelper.cleanTable();
+    await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
   });
@@ -114,7 +120,7 @@ describe('Threads endpoint', () => {
   });
 
   describe('when GET /threads/{threadId}', () => {
-    it('should response 200 and detail thread', async () => {
+    it('should response 200 and detail thread including comments and replies', async () => {
       const thread = {
         id: 'thread-123',
         title: 'Thread Title',
@@ -122,8 +128,31 @@ describe('Threads endpoint', () => {
         date: '2021-08-08T07:19:09.775Z',
       };
 
-      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'john_doe' });
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({ id: 'user-456', username: 'johndoe' });
       await ThreadsTableTestHelper.addThread({ ...thread, owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        owner: 'user-123',
+        threadId: thread.id,
+        content: 'sebuah comment',
+        date: '2021-08-08T07:19:18.982Z',
+      });
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        owner: 'user-456',
+        commentId: 'comment-123',
+        content: 'balasan pertama',
+        date: '2021-08-08T07:59:48.766Z',
+        isDeleted: true,
+      });
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-456',
+        owner: 'user-123',
+        commentId: 'comment-123',
+        content: 'balasan kedua',
+        date: '2021-08-08T08:07:01.522Z',
+      });
 
       const response = await request(server).get(`/threads/${thread.id}`);
 
@@ -134,6 +163,21 @@ describe('Threads endpoint', () => {
       expect(response.body.data.thread.title).toEqual(thread.title);
       expect(response.body.data.thread.body).toEqual(thread.body);
       expect(response.body.data.thread.date).toEqual(thread.date);
+      expect(response.body.data.thread.comments).toHaveLength(1);
+      const [comment] = response.body.data.thread.comments;
+      expect(comment.id).toEqual('comment-123');
+      expect(comment.content).toEqual('sebuah comment');
+      expect(comment.replies).toHaveLength(2);
+      expect(comment.replies[0]).toMatchObject({
+        id: 'reply-123',
+        content: '**balasan telah dihapus**',
+        username: 'johndoe',
+      });
+      expect(comment.replies[1]).toMatchObject({
+        id: 'reply-456',
+        content: 'balasan kedua',
+        username: 'dicoding',
+      });
     });
     it('should response 404 when thread not found', async () => {
       const response = await request(server).get('/threads/thread-999');

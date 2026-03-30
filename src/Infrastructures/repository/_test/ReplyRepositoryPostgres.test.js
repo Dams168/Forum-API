@@ -6,6 +6,7 @@ import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
 import AddReply from '../../../Domains/replies/entities/AddReply.js';
 import AddedReply from '../../../Domains/replies/entities/AddedReply.js';
+import { describe } from 'vitest';
 
 describe('ReplyRepositoryPostgres', () => {
   afterEach(async () => {
@@ -71,6 +72,52 @@ describe('ReplyRepositoryPostgres', () => {
           owner: 'user-123',
         }),
       );
+    });
+  });
+
+  describe('getRepliesByCommentId function', () => {
+    it('should return array of replies correctly', async () => {
+      // Arrange
+      const firstDate = new Date('2021-08-08T07:19:09.775Z');
+      const secondDate = new Date('2021-08-08T08:19:09.775Z');
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        content: 'sebuah balasan',
+        owner: 'user-123',
+        commentId: 'comment-123',
+        date: firstDate.toISOString(),
+      });
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-456',
+        content: 'balasan kedua',
+        owner: 'user-123',
+        commentId: 'comment-123',
+        date: secondDate.toISOString(),
+        isDeleted: true,
+      });
+
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action
+      const replies = await replyRepositoryPostgres.getRepliesByCommentId('comment-123');
+
+      // Assert
+      expect(replies).toStrictEqual([
+        {
+          id: 'reply-123',
+          content: 'sebuah balasan',
+          date: firstDate.toISOString(),
+          username: 'dicoding',
+          isDeleted: false,
+        },
+        {
+          id: 'reply-456',
+          content: 'balasan kedua',
+          date: secondDate.toISOString(),
+          username: 'dicoding',
+          isDeleted: true,
+        },
+      ]);
     });
   });
 });

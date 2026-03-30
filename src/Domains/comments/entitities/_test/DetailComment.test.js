@@ -29,6 +29,18 @@ describe('a DetailComment entities', () => {
     );
   });
 
+  it('should throw error when replies is not an array', () => {
+    const payload = {
+      id: 'comment-123',
+      content: 'sebuah comment',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'john_doe',
+      replies: {},
+    };
+
+    expect(() => new DetailComment(payload)).toThrowError('DETAIL_COMMENT.REPLIES_NOT_ARRAY');
+  });
+
   it('should create DetailComment object correctly', () => {
     // Arrange
     const payload = {
@@ -36,6 +48,7 @@ describe('a DetailComment entities', () => {
       content: 'sebuah comment',
       date: '2021-08-08T07:19:09.775Z',
       username: 'john_doe',
+      replies: [],
     };
 
     // Action
@@ -46,5 +59,6 @@ describe('a DetailComment entities', () => {
     expect(detailComment.content).toBe(payload.content);
     expect(detailComment.date).toBe(payload.date);
     expect(detailComment.username).toBe(payload.username);
+    expect(detailComment.replies).toEqual([]);
   });
 });

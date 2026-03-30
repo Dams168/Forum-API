@@ -3,4 +3,7 @@ export default class ReplyRepository {
   async addReply(addReply, owner, commentId) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
+  async getRepliesByCommentId(commentId) {
+    throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
 }
