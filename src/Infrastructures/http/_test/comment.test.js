@@ -3,6 +3,7 @@ import request from 'supertest';
 import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
+import AccessTokenTestHelper from '../../../../tests/AccessTokenTestHelper.js';
 import pool from '../../database/postgres/pool.js';
 import createServer from '../../http/createServer.js';
 import container from '../../container.js';
@@ -33,25 +34,13 @@ describe('Comments endpoint', () => {
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
   });
-
-  const getAccessToken = async () => {
-    const unique = Date.now();
-    const userId = `user-${unique}`;
-    const username = `dicoding-${unique}`;
-
-    await UsersTableTestHelper.addUser({ id: userId, username });
-    const accessToken = await tokenManager.createAccessToken({ id: userId, username });
-
-    return { accessToken, userId };
-  };
-
   describe('when POST /threads/{threadId}/comments', () => {
     it('should response 201 and persisted comment', async () => {
       const requestPayload = {
         content: 'sebuah comment',
       };
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
 
@@ -69,7 +58,7 @@ describe('Comments endpoint', () => {
         content: 'sebuah comment',
       };
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
 
@@ -101,7 +90,7 @@ describe('Comments endpoint', () => {
       expect(response.body.message).toEqual('Missing authentication');
     });
     it('should response 404 when comment not found', async () => {
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
@@ -115,7 +104,7 @@ describe('Comments endpoint', () => {
       expect(response.body.message).toEqual('Comment not found');
     });
     it('should response 200 and delete the comment', async () => {
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
 

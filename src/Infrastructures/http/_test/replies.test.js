@@ -3,6 +3,7 @@ import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
+import AccessTokenTestHelper from '../../../../tests/AccessTokenTestHelper.js';
 import container from '../../container.js';
 import createServer from '../../http/createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
@@ -34,25 +35,13 @@ describe('Replies endpoint', () => {
     await UsersTableTestHelper.cleanTable();
     await RepliesTableTestHelper.cleanTable();
   });
-
-  const getAccessToken = async () => {
-    const unique = Date.now();
-    const userId = `user-${unique}`;
-    const username = `dicoding-${unique}`;
-
-    await UsersTableTestHelper.addUser({ id: userId, username });
-    const accessToken = await tokenManager.createAccessToken({ id: userId, username });
-
-    return { accessToken, userId };
-  };
-
   describe('when POST /threads/{threadId}/comments/{commentId}/replies', () => {
     it('should response 201 and persisted reply', async () => {
       const requestPayload = {
         content: 'sebuah balasan comment',
       };
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
@@ -73,7 +62,7 @@ describe('Replies endpoint', () => {
         content: 'sebuah balasan comment',
       };
 
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
 
@@ -91,7 +80,7 @@ describe('Replies endpoint', () => {
         content: 'sebuah balasan comment',
       };
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
@@ -108,7 +97,7 @@ describe('Replies endpoint', () => {
     it('should response 400 when request payload not contain needed property', async () => {
       const requestPayload = {};
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
@@ -130,7 +119,7 @@ describe('Replies endpoint', () => {
         content: 123,
       };
 
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
@@ -167,7 +156,7 @@ describe('Replies endpoint', () => {
 
   describe('when DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}', () => {
     it('should response 200 and delete reply', async () => {
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       const replyId = 'reply-123';
@@ -189,7 +178,7 @@ describe('Replies endpoint', () => {
       expect(response.body.status).toEqual('success');
     });
     it('should response 404 when thread not found', async () => {
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       const replyId = 'reply-123';
@@ -203,7 +192,7 @@ describe('Replies endpoint', () => {
       expect(response.body.message).toEqual('Thread not found');
     });
     it('should response 404 when comment not found', async () => {
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       const replyId = 'reply-123';
@@ -218,7 +207,7 @@ describe('Replies endpoint', () => {
       expect(response.body.message).toEqual('Comment not found');
     });
     it('should response 404 when reply not found', async () => {
-      const { accessToken, userId } = await getAccessToken();
+      const { accessToken, userId } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       const replyId = 'reply-123';
@@ -234,7 +223,7 @@ describe('Replies endpoint', () => {
       expect(response.body.message).toEqual('Reply not found');
     });
     it('should response 403 when user is not owner of the reply', async () => {
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
       const anotherUserId = `user-${Date.now()}`;
       await UsersTableTestHelper.addUser({ id: anotherUserId, username: `dicoding-${Date.now()}` });
       const threadId = 'thread-123';

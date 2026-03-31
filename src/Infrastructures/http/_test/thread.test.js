@@ -4,6 +4,7 @@ import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
+import AccessTokenTestHelper from '../../../../tests/AccessTokenTestHelper.js';
 import pool from '../../database/postgres/pool.js';
 import createServer from '../../http/createServer.js';
 import container from '../../container.js';
@@ -36,18 +37,6 @@ describe('Threads endpoint', () => {
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
   });
-
-  const getAccessToken = async () => {
-    const unique = Date.now();
-    const userId = `user-${unique}`;
-    const username = `dicoding-${unique}`;
-
-    await UsersTableTestHelper.addUser({ id: userId, username });
-    const accessToken = await tokenManager.createAccessToken({ id: userId, username });
-
-    return { accessToken, userId };
-  };
-
   describe('when POST /threads', () => {
     it('should response 201 and persisted thread', async () => {
       const requestPayload = {
@@ -55,7 +44,7 @@ describe('Threads endpoint', () => {
         body: 'Thread Body',
       };
 
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
 
       const response = await request(server)
         .post('/threads')
@@ -73,7 +62,7 @@ describe('Threads endpoint', () => {
         title: 'Thread Title',
       };
 
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
 
       const response = await request(server)
         .post('/threads')
@@ -93,7 +82,7 @@ describe('Threads endpoint', () => {
         body: 'lorem ipsum',
       };
 
-      const { accessToken } = await getAccessToken();
+      const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
 
       const response = await request(server)
         .post('/threads')
