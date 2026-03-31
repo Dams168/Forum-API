@@ -7,6 +7,31 @@ import DetailReply from '../../../Domains/replies/entities/DetailReply.js';
 import ReplyRepository from '../../../Domains/replies/ReplyRepository.js';
 
 describe('GetDetailThreadUseCase', () => {
+  it('should throw error if thread not found', async () => {
+    // Arrange
+    const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
+
+    mockThreadRepository.getDetailThreadById = vi
+      .fn()
+      .mockImplementation(() => Promise.reject(new Error('THREAD_REPOSITORY.THREAD_NOT_FOUND')));
+
+    const getDetailThreadUseCase = new GetDetailThreadUseCase({
+      threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
+    });
+
+    // Action and Assert
+    await expect(getDetailThreadUseCase.execute('thread-123')).rejects.toThrowError(
+      'THREAD_REPOSITORY.THREAD_NOT_FOUND',
+    );
+
+    expect(mockThreadRepository.getDetailThreadById).toBeCalledWith('thread-123');
+    expect(mockThreadRepository.getDetailThreadById).toHaveBeenCalledTimes(1);
+  });
+
   it('should orchestrating the get detail thread action correctly', async () => {
     // Arrange
 
