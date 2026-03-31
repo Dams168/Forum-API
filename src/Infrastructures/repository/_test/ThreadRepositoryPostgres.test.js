@@ -2,7 +2,7 @@ import pool from '../../database/postgres/pool.js';
 import AddThread from '../../../Domains/threads/entities/AddThread.js';
 import AddedThread from '../../../Domains/threads/entities/AddedThread.js';
 import ThreadRepositoryPostgres from '../ThreadRepositoryPostgres.js';
-import { afterEach, beforeEach, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect } from 'vitest';
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import NotFoundError from '../../../Commons/exceptions/NotFoundError.js';
@@ -90,6 +90,31 @@ describe('ThreadRepositoryPostgres', () => {
         username: 'dicoding',
         date: timezoneNeutralDate,
       });
+    });
+  });
+
+  describe('checkAvailabilityThread function', async () => {
+    it('should throw NotFoundError when thread not found', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      await expect(
+        threadRepositoryPostgres.checkAvailabilityThread('thread-999'),
+      ).rejects.toThrowError(new NotFoundError('Thread not found'));
+    });
+
+    it('should not throw NotFoundError when thread found', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123',
+        title: 'sebuah thread',
+        body: 'sebuah body thread',
+        owner: 'user-123',
+      });
+
+      await expect(
+        threadRepositoryPostgres.checkAvailabilityThread('thread-123'),
+      ).resolves.not.toThrowError();
     });
   });
 });
