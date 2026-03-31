@@ -8,7 +8,7 @@ import AddReply from '../../../Domains/replies/entities/AddReply.js';
 import AddedReply from '../../../Domains/replies/entities/AddedReply.js';
 import AuthorizationError from '../../../Commons/exceptions/AuthorizationError.js';
 import NotFoundError from '../../../Commons/exceptions/NotFoundError.js';
-import { it } from 'vitest';
+import { describe, it } from 'vitest';
 
 describe('ReplyRepositoryPostgres', () => {
   afterEach(async () => {
@@ -46,7 +46,7 @@ describe('ReplyRepositoryPostgres', () => {
       await replyRepositoryPostgres.addReply(newReply, 'user-123', 'comment-123');
 
       // Assert
-      const replies = await RepliesTableTestHelper.findRepliesById('reply-123');
+      const replies = await RepliesTableTestHelper.findReplyById('reply-123');
       expect(replies).toHaveLength(1);
     });
 
@@ -130,6 +130,16 @@ describe('ReplyRepositoryPostgres', () => {
         owner: 'user-123',
         commentId: 'comment-123',
       });
+    });
+
+    it('should throw NotFoundError if reply not found', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.verifyReplyOwner('reply-999', 'user-123'),
+      ).rejects.toThrowError(new NotFoundError('Reply not found'));
     });
 
     it('should throw UnauthorizedError if reply owner is different from the given owner', async () => {
@@ -216,6 +226,28 @@ describe('ReplyRepositoryPostgres', () => {
       await expect(
         replyRepositoryPostgres.checkAvailabilityReply('reply-123', 'comment-123'),
       ).resolves.not.toThrowError();
+    });
+  });
+
+  describe('deleteReplyById function', () => {
+    it('should soft delete the reply and update isDeleted field', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        content: 'sebuah balasan',
+        owner: 'user-123',
+        commentId: 'comment-123',
+        date: new Date('2021-08-08T07:19:09.775Z').toISOString(),
+        isDeleted: false,
+      });
+
+      // Action
+      await replyRepositoryPostgres.deleteReplyById('reply-123');
+
+      // Assert
+      const deletedReply = await RepliesTableTestHelper.findReplyById('reply-123');
+      expect(deletedReply[0].is_deleted).toBe(true);
     });
   });
 });
