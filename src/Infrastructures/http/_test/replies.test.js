@@ -2,6 +2,7 @@ import pool from '../../database/postgres/pool.js';
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper.js';
 import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
+import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
 import container from '../../container.js';
 import createServer from '../../http/createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
@@ -24,12 +25,14 @@ describe('Replies endpoint', () => {
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
+    await RepliesTableTestHelper.cleanTable();
   });
 
   afterEach(async () => {
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
+    await RepliesTableTestHelper.cleanTable();
   });
 
   const getAccessToken = async () => {
@@ -155,6 +158,114 @@ describe('Replies endpoint', () => {
       const response = await request(server)
         .post(`/threads/${threadId}/comments/${commentId}/replies`)
         .send(requestPayload);
+
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Missing authentication');
+    });
+  });
+
+  describe('when DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}', () => {
+    it('should response 200 and delete reply', async () => {
+      const { accessToken, userId } = await getAccessToken();
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+      await CommentsTableTestHelper.addComment({ id: commentId, owner: userId, threadId });
+      await RepliesTableTestHelper.addReply({
+        id: replyId,
+        content: 'sebuah balasan',
+        owner: userId,
+        commentId,
+        date: new Date('2021-08-08T07:19:09.775Z').toISOString(),
+      });
+
+      const response = await request(server)
+        .delete(`/threads/${threadId}/comments/${commentId}/replies/${replyId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toEqual(200);
+      expect(response.body.status).toEqual('success');
+    });
+    it('should response 404 when thread not found', async () => {
+      const { accessToken } = await getAccessToken();
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+
+      const response = await request(server)
+        .delete(`/threads/${threadId}/comments/${commentId}/replies/${replyId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Thread not found');
+    });
+    it('should response 404 when comment not found', async () => {
+      const { accessToken, userId } = await getAccessToken();
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+
+      const response = await request(server)
+        .delete(`/threads/${threadId}/comments/${commentId}/replies/${replyId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Comment not found');
+    });
+    it('should response 404 when reply not found', async () => {
+      const { accessToken, userId } = await getAccessToken();
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
+      await CommentsTableTestHelper.addComment({ id: commentId, owner: userId, threadId });
+
+      const response = await request(server)
+        .delete(`/threads/${threadId}/comments/${commentId}/replies/${replyId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Reply not found');
+    });
+    it('should response 403 when user is not owner of the reply', async () => {
+      const { accessToken } = await getAccessToken();
+      const anotherUserId = `user-${Date.now()}`;
+      await UsersTableTestHelper.addUser({ id: anotherUserId, username: `dicoding-${Date.now()}` });
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+      await ThreadsTableTestHelper.addThread({ id: threadId, owner: anotherUserId });
+      await CommentsTableTestHelper.addComment({ id: commentId, owner: anotherUserId, threadId });
+      await RepliesTableTestHelper.addReply({
+        id: replyId,
+        content: 'sebuah balasan',
+        owner: anotherUserId,
+        commentId,
+        date: new Date('2021-08-08T07:19:09.775Z').toISOString(),
+      });
+
+      const response = await request(server)
+        .delete(`/threads/${threadId}/comments/${commentId}/replies/${replyId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toEqual(403);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Anda tidak berhak menghapus balasan ini');
+    });
+    it('should response 401 when request payload not contain access token', async () => {
+      const threadId = 'thread-123';
+      const commentId = 'comment-123';
+      const replyId = 'reply-123';
+
+      const response = await request(server).delete(
+        `/threads/${threadId}/comments/${commentId}/replies/${replyId}`,
+      );
 
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');

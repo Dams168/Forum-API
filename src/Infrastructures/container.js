@@ -34,6 +34,7 @@ import GetDetailThreadUseCase from '../Applications/use_case/GetDetailThreadUseC
 import ReplyRepository from '../Domains/replies/ReplyRepository.js';
 import ReplyRepositoryPostgres from './repository/ReplyRepositoryPostgres.js';
 import AddReplyUseCase from '../Applications/use_case/AddReplyUseCase.js';
+import DeleteReplyUseCase from '../Applications/use_case/DeleteReplyUseCase.js';
 
 // creating container
 const container = createContainer();
@@ -276,6 +277,27 @@ container.register([
   {
     key: AddReplyUseCase.name,
     Class: AddReplyUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: DeleteReplyUseCase.name,
+    Class: DeleteReplyUseCase,
     parameter: {
       injectType: 'destructuring',
       dependencies: [

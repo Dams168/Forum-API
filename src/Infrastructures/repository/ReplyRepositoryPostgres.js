@@ -1,5 +1,7 @@
 import ReplyRepository from '../../Domains/replies/ReplyRepository.js';
 import AddedReply from '../../Domains/replies/entities/AddedReply.js';
+import AuthorizationError from '../../Commons/exceptions/AuthorizationError.js';
+import NotFoundError from '../../Commons/exceptions/NotFoundError.js';
 
 const toISOStringPreservingLocal = (dateValue) =>
   new Date(dateValue.getTime() - dateValue.getTimezoneOffset() * 60000).toISOString();
@@ -50,5 +52,56 @@ export default class ReplyRepositoryPostgres extends ReplyRepository {
       username,
       isDeleted,
     }));
+  }
+
+  async verifyReplyOwner(replyId, owner) {
+    const query = {
+      text: 'SELECT owner FROM replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Reply not found');
+    }
+
+    const { owner: replyOwner } = result.rows[0];
+
+    if (replyOwner !== owner) {
+      throw new AuthorizationError('Anda tidak berhak menghapus balasan ini');
+    }
+  }
+
+  async checkAvailabilityReply(replyId, commentId) {
+    const query = {
+      text: 'SELECT comment_id, is_deleted FROM replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Reply not found');
+    }
+
+    const { comment_id: storedCommentId, is_deleted: isDeleted } = result.rows[0];
+
+    if (storedCommentId !== commentId) {
+      throw new NotFoundError('Reply not found in comment');
+    }
+
+    if (isDeleted) {
+      throw new NotFoundError('Reply not found');
+    }
+  }
+
+  async deleteReplyById(replyId) {
+    const query = {
+      text: 'UPDATE replies SET is_deleted = true WHERE id = $1',
+      values: [replyId],
+    };
+
+    await this._pool.query(query);
   }
 }

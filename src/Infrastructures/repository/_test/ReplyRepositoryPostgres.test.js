@@ -6,7 +6,9 @@ import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
 import AddReply from '../../../Domains/replies/entities/AddReply.js';
 import AddedReply from '../../../Domains/replies/entities/AddedReply.js';
-import { describe } from 'vitest';
+import AuthorizationError from '../../../Commons/exceptions/AuthorizationError.js';
+import NotFoundError from '../../../Commons/exceptions/NotFoundError.js';
+import { it } from 'vitest';
 
 describe('ReplyRepositoryPostgres', () => {
   afterEach(async () => {
@@ -118,6 +120,102 @@ describe('ReplyRepositoryPostgres', () => {
           isDeleted: true,
         },
       ]);
+    });
+  });
+
+  describe('verifyReplyOwner function', () => {
+    beforeEach(async () => {
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        owner: 'user-123',
+        commentId: 'comment-123',
+      });
+    });
+
+    it('should throw UnauthorizedError if reply owner is different from the given owner', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.verifyReplyOwner('reply-123', 'user-456'),
+      ).rejects.toThrowError(new AuthorizationError('Anda tidak berhak menghapus balasan ini'));
+    });
+
+    it('should not throw error if reply owner is the same as the given owner', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.verifyReplyOwner('reply-123', 'user-123'),
+      ).resolves.not.toThrowError();
+    });
+  });
+
+  describe('checkAvailabilityReply function', () => {
+    it('should throw NotFoundError if reply not available', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.checkAvailabilityReply('reply-123', 'comment-123'),
+      ).rejects.toThrowError(new NotFoundError('Reply not found'));
+    });
+
+    it('should throw NotFoundError when reply is deleted', async () => {
+      // Arrange
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        content: 'sebuah balasan',
+        owner: 'user-123',
+        commentId: 'comment-123',
+        date: new Date('2021-08-08T07:19:09.775Z').toISOString(),
+        isDeleted: true,
+      });
+
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.checkAvailabilityReply('reply-123', 'comment-123'),
+      ).rejects.toThrowError(new NotFoundError('Reply not found'));
+    });
+
+    it('should throw NotFoundError when reply not found in comment', async () => {
+      // Arrange
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-456',
+        owner: 'user-123',
+        threadId: 'thread-123',
+      });
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-456',
+        owner: 'user-123',
+        commentId: 'comment-456',
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.checkAvailabilityReply('reply-456', 'comment-123'),
+      ).rejects.toThrowError(new NotFoundError('Reply not found in comment'));
+    });
+
+    it('should not throw error if reply is available', async () => {
+      // Arrange
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        owner: 'user-123',
+        commentId: 'comment-123',
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(
+        replyRepositoryPostgres.checkAvailabilityReply('reply-123', 'comment-123'),
+      ).resolves.not.toThrowError();
     });
   });
 });
