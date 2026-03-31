@@ -6,7 +6,7 @@ export default class DeleteCommentUseCase {
 
   async execute(owner, useCaseParams) {
     const { threadId, commentId } = useCaseParams;
-    await this._threadRepository.verifyThreadById(threadId);
+    await this._threadRepository.checkAvailabilityThread(threadId);
     await this._commentRepository.checkAvailabilityComment(commentId, threadId);
     await this._commentRepository.verifyCommentOwner(commentId, owner);
     await this._commentRepository.deleteCommentById(commentId);

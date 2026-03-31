@@ -9,7 +9,7 @@ export default class AddReplyUseCase {
 
   async execute(useCasePayload, useCaseParams, owner) {
     const { threadId, commentId } = useCaseParams;
-    await this._threadRepository.verifyThreadById(threadId);
+    await this._threadRepository.checkAvailabilityThread(threadId);
     await this._commentRepository.checkAvailabilityComment(commentId, threadId);
 
     const addReply = new AddReply({

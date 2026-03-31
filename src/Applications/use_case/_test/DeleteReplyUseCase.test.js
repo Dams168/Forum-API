@@ -18,7 +18,9 @@ describe('DeleteReplyUseCase', () => {
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
 
-    mockThreadRepository.verifyThreadById = vi.fn().mockImplementation(() => Promise.resolve());
+    mockThreadRepository.checkAvailabilityThread = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve());
 
     mockCommentRepository.checkAvailabilityComment = vi
       .fn()
@@ -40,7 +42,9 @@ describe('DeleteReplyUseCase', () => {
     await deleteReplyUseCase.execute(userId, useCaseParams);
 
     // Assert
-    expect(mockThreadRepository.verifyThreadById).toHaveBeenCalledWith(useCaseParams.threadId);
+    expect(mockThreadRepository.checkAvailabilityThread).toHaveBeenCalledWith(
+      useCaseParams.threadId,
+    );
     expect(mockCommentRepository.checkAvailabilityComment).toHaveBeenCalledWith(
       useCaseParams.commentId,
       useCaseParams.threadId,

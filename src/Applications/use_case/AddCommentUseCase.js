@@ -11,7 +11,7 @@ export default class AddCommentUseCase {
       content: useCasePayload.content,
     });
 
-    await this._threadRepository.verifyThreadById(useCasePayload.threadId);
+    await this._threadRepository.checkAvailabilityThread(useCasePayload.threadId);
     return this._commentRepository.addComment(
       addComment,
       useCasePayload.owner,

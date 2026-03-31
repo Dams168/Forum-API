@@ -31,7 +31,9 @@ describe('AddReplyUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThreadById = vi.fn().mockImplementation(() => Promise.resolve());
+    mockThreadRepository.checkAvailabilityThread = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve());
     mockCommentRepository.checkAvailabilityComment = vi
       .fn()
       .mockImplementation(() => Promise.resolve());
@@ -58,7 +60,7 @@ describe('AddReplyUseCase', () => {
       }),
     );
 
-    expect(mockThreadRepository.verifyThreadById).toBeCalledWith(useCaseParams.threadId);
+    expect(mockThreadRepository.checkAvailabilityThread).toBeCalledWith(useCaseParams.threadId);
     expect(mockCommentRepository.checkAvailabilityComment).toBeCalledWith(
       useCaseParams.commentId,
       useCaseParams.threadId,

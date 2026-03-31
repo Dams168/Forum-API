@@ -15,7 +15,9 @@ describe('DeleteCommentUseCase', () => {
     const mockThreadRepository = new threadRepository();
     const mockCommentRepository = new CommentRepository();
 
-    mockThreadRepository.verifyThreadById = vi.fn().mockImplementation(() => Promise.resolve());
+    mockThreadRepository.checkAvailabilityThread = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve());
 
     mockCommentRepository.checkAvailabilityComment = vi
       .fn()
@@ -32,7 +34,9 @@ describe('DeleteCommentUseCase', () => {
     await deleteCommentUseCase.execute(userId, useCaseParams);
 
     // Assert
-    expect(mockThreadRepository.verifyThreadById).toHaveBeenCalledWith(useCaseParams.threadId);
+    expect(mockThreadRepository.checkAvailabilityThread).toHaveBeenCalledWith(
+      useCaseParams.threadId,
+    );
     expect(mockCommentRepository.checkAvailabilityComment).toHaveBeenCalledWith(
       useCaseParams.commentId,
       useCaseParams.threadId,
