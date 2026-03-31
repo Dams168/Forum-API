@@ -36,9 +36,25 @@ describe('a DetailComment entities', () => {
       date: '2021-08-08T07:19:09.775Z',
       username: 'john_doe',
       replies: {},
+      isDeleted: false,
     };
 
     expect(() => new DetailComment(payload)).toThrowError('DETAIL_COMMENT.REPLIES_NOT_ARRAY');
+  });
+
+  it('should throw error when isDeleted is not a boolean', () => {
+    const payload = {
+      id: 'comment-123',
+      content: 'sebuah comment',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'john_doe',
+      replies: [],
+      isDeleted: 'true',
+    };
+
+    expect(() => new DetailComment(payload)).toThrowError(
+      'DETAIL_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION',
+    );
   });
 
   it('should create DetailComment object correctly', () => {
@@ -49,6 +65,7 @@ describe('a DetailComment entities', () => {
       date: '2021-08-08T07:19:09.775Z',
       username: 'john_doe',
       replies: [],
+      isDeleted: false,
     };
 
     // Action
@@ -60,5 +77,20 @@ describe('a DetailComment entities', () => {
     expect(detailComment.date).toBe(payload.date);
     expect(detailComment.username).toBe(payload.username);
     expect(detailComment.replies).toEqual([]);
+  });
+
+  it('should mask content when comment deleted', () => {
+    const payload = {
+      id: 'comment-123',
+      content: 'sebuah comment',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'john_doe',
+      replies: [],
+      isDeleted: true,
+    };
+
+    const detailComment = new DetailComment(payload);
+
+    expect(detailComment.content).toBe('**komentar telah dihapus**');
   });
 });
