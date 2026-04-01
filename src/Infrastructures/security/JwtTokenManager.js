@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import AuthenticationTokenManager from '../../Applications/security/AuthenticationTokenManager.js';
 import config from '../../Commons/config.js';
 import InvariantError from '../../Commons/exceptions/InvariantError.js';

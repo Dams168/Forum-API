@@ -1,8 +1,16 @@
+/* eslint-disable no-unused-vars */
 import express from 'express';
+import jwt from 'jsonwebtoken';
+import config from '../../Commons/config.js';
+import AuthenticationError from '../../Commons/exceptions/AuthenticationError.js';
 import ClientError from '../../Commons/exceptions/ClientError.js';
 import DomainErrorTranslator from '../../Commons/exceptions/DomainErrorTranslator.js';
 import users from '../../Interfaces/http/api/users/index.js';
 import authentications from '../../Interfaces/http/api/authentications/index.js';
+import threads from '../../Interfaces/http/api/threads/index.js';
+import comments from '../../Interfaces/http/api/comments/index.js';
+import authMiddleware from './middleware/AuthMiddleware.js';
+import replies from '../../Interfaces/http/api/replies/index.js';
 
 const createServer = async (container) => {
   const app = express();
@@ -13,9 +21,12 @@ const createServer = async (container) => {
   // Register routes
   app.use('/users', users(container));
   app.use('/authentications', authentications(container));
-
+  app.use('/threads', threads(container));
+  app.use('/threads/:threadId/comments', authMiddleware, comments(container));
+  app.use('/threads/:threadId/comments/:commentId/replies', authMiddleware, replies(container));
   // Global error handler
   app.use((error, req, res, next) => {
+    // console.error(error); // log error for debugging
     // bila response tersebut error, tangani sesuai kebutuhan
     const translatedError = DomainErrorTranslator.translate(error);
 
