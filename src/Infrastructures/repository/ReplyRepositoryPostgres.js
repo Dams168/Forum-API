@@ -48,7 +48,7 @@ export default class ReplyRepositoryPostgres extends ReplyRepository {
     return result.rows.map(({ id, content, date, username, isDeleted }) => ({
       id,
       content,
-      date: toISOStringPreservingLocal(date instanceof Date ? date : new Date(date)),
+      date: toISOStringPreservingLocal(new Date(date)),
       username,
       isDeleted,
     }));

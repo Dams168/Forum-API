@@ -88,7 +88,7 @@ export default class CommentRepositoryPostgres extends CommentRepository {
     return result.rows.map(({ id, content, date, username, isDeleted }) => ({
       id,
       username,
-      date: toISOStringPreservingLocal(date instanceof Date ? date : new Date(date)),
+      date: toISOStringPreservingLocal(new Date(date)),
       content,
       isDeleted,
     }));
