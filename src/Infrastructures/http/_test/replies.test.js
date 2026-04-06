@@ -224,8 +224,12 @@ describe('Replies endpoint', () => {
     });
     it('should response 403 when user is not owner of the reply', async () => {
       const { accessToken } = await AccessTokenTestHelper.getAccessToken(tokenManager);
-      const anotherUserId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: anotherUserId, username: `dicoding-${Date.now()}` });
+      const unique = Date.now();
+      const anotherUserId = `user-another-${unique}`;
+      await UsersTableTestHelper.addUser({
+        id: anotherUserId,
+        username: `dicoding-another-${unique}`,
+      });
       const threadId = 'thread-123';
       const commentId = 'comment-123';
       const replyId = 'reply-123';

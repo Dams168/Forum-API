@@ -38,7 +38,7 @@ export const up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 export const down = (pgm) => {
-  pgm.dropTable('user_comment_likes');
   pgm.dropConstraint('user_comment_likes', 'user_comment_likes_comment_id_fkey');
   pgm.dropConstraint('user_comment_likes', 'user_comment_likes_owner_fkey');
+  pgm.dropTable('user_comment_likes');
 };
