@@ -4,6 +4,7 @@ import { ThreadsTableTestHelper } from '../../../../tests/ThreadsTableTestHelper
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import { CommentsTableTestHelper } from '../../../../tests/CommentsTableTestHelper.js';
 import RepliesTableTestHelper from '../../../../tests/RepliesTableTestHelper.js';
+import { LikesTableTestHelper } from '../../../../tests/LikesTableTestHelper.js';
 import AccessTokenTestHelper from '../../../../tests/AccessTokenTestHelper.js';
 import pool from '../../database/postgres/pool.js';
 import createServer from '../../http/createServer.js';
@@ -25,6 +26,7 @@ describe('Threads endpoint', () => {
   });
 
   beforeEach(async () => {
+    await LikesTableTestHelper.cleanTable();
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
@@ -32,6 +34,7 @@ describe('Threads endpoint', () => {
   });
 
   afterEach(async () => {
+    await LikesTableTestHelper.cleanTable();
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
@@ -142,6 +145,16 @@ describe('Threads endpoint', () => {
         content: 'balasan kedua',
         date: '2021-08-08T08:07:01.522Z',
       });
+      await LikesTableTestHelper.addLike({
+        id: 'like-111',
+        commentId: 'comment-123',
+        owner: 'user-123',
+      });
+      await LikesTableTestHelper.addLike({
+        id: 'like-222',
+        commentId: 'comment-123',
+        owner: 'user-456',
+      });
 
       const response = await request(server).get(`/threads/${thread.id}`);
 
@@ -156,6 +169,7 @@ describe('Threads endpoint', () => {
       const [comment] = response.body.data.thread.comments;
       expect(comment.id).toEqual('comment-123');
       expect(comment.content).toEqual('sebuah comment');
+      expect(comment.likeCount).toEqual(2);
       expect(comment.replies).toHaveLength(2);
       expect(comment.replies[0]).toMatchObject({
         id: 'reply-123',
