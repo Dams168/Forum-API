@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import UsersTableTestHelper from './UsersTableTestHelper.js';
 
 const AccessTokenTestHelper = {

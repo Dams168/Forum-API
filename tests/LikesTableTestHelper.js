@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import pool from '../src/Infrastructures/database/postgres/pool.js';
 export const LikesTableTestHelper = {
   async addLike({ id = 'like-123', commentId = 'comment-123', owner = 'user-123' }) {

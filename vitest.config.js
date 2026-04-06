@@ -11,5 +11,9 @@ export default defineConfig({
     sequence: {
       concurrent: false,
     },
+    coverage: {
+      enabled: true,
+      exclude: ['src/Commons/config.js'],
+    },
   },
 });
