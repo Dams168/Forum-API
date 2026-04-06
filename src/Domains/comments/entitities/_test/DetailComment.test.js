@@ -57,6 +57,22 @@ describe('a DetailComment entities', () => {
     );
   });
 
+  it('should throw error when likeCount is not a number', () => {
+    const payload = {
+      id: 'comment-123',
+      content: 'sebuah comment',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'john_doe',
+      replies: [],
+      likeCount: '1',
+      isDeleted: false,
+    };
+
+    expect(() => new DetailComment(payload)).toThrowError(
+      'DETAIL_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION',
+    );
+  });
+
   it('should create DetailComment object correctly', () => {
     // Arrange
     const payload = {
@@ -77,6 +93,23 @@ describe('a DetailComment entities', () => {
     expect(detailComment.date).toBe(payload.date);
     expect(detailComment.username).toBe(payload.username);
     expect(detailComment.replies).toEqual([]);
+    expect(detailComment.likeCount).toBe(0);
+  });
+
+  it('should create DetailComment object with likeCount correctly', () => {
+    const payload = {
+      id: 'comment-123',
+      content: 'sebuah comment',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'john_doe',
+      replies: [],
+      likeCount: 2,
+      isDeleted: false,
+    };
+
+    const detailComment = new DetailComment(payload);
+
+    expect(detailComment.likeCount).toBe(2);
   });
 
   it('should mask content when comment deleted', () => {

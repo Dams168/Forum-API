@@ -5,6 +5,7 @@ import DetailThread from '../../../Domains/threads/entities/DetailThread.js';
 import DetailComment from '../../../Domains/comments/entitities/DetailComment.js';
 import DetailReply from '../../../Domains/replies/entities/DetailReply.js';
 import ReplyRepository from '../../../Domains/replies/ReplyRepository.js';
+import LikeRepository from '../../../Domains/likes/LikeRepository.js';
 
 describe('GetDetailThreadUseCase', () => {
   it('should throw error if thread not found', async () => {
@@ -12,6 +13,7 @@ describe('GetDetailThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.getDetailThreadById = vi
       .fn()
@@ -21,6 +23,7 @@ describe('GetDetailThreadUseCase', () => {
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action and Assert
@@ -81,6 +84,7 @@ describe('GetDetailThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** mocking needed function */
     mockThreadRepository.getDetailThreadById = vi
@@ -96,12 +100,20 @@ describe('GetDetailThreadUseCase', () => {
 
       return Promise.resolve([]);
     });
+    mockLikeRepository.countLikeComment = vi.fn().mockImplementation((commentId) => {
+      if (commentId === 'comment-123') {
+        return Promise.resolve(2);
+      }
+
+      return Promise.resolve(0);
+    });
 
     /** creating use case instance */
     const getDetailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -137,6 +149,7 @@ describe('GetDetailThreadUseCase', () => {
                 isDelete: true,
               }),
             ],
+            likeCount: 2,
             isDeleted: false,
           }),
           new DetailComment({
@@ -145,6 +158,7 @@ describe('GetDetailThreadUseCase', () => {
             date: '2021-08-08T07:19:09.775Z',
             username: 'john_doe',
             replies: [],
+            likeCount: 0,
             isDeleted: true,
           }),
         ],
@@ -158,5 +172,8 @@ describe('GetDetailThreadUseCase', () => {
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledWith('comment-123');
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledWith('comment-124');
     expect(mockReplyRepository.getRepliesByCommentId).toHaveBeenCalledTimes(2);
+    expect(mockLikeRepository.countLikeComment).toBeCalledWith('comment-123');
+    expect(mockLikeRepository.countLikeComment).toBeCalledWith('comment-124');
+    expect(mockLikeRepository.countLikeComment).toHaveBeenCalledTimes(2);
   });
 });
